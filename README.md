@@ -1,3 +1,47 @@
+# EKS Auditing Bot Terraform Module
+
+This Terraform module sets up an automated auditing bot for Amazon EKS (Elastic Kubernetes Service) clusters. The bot monitors CloudWatch Logs for EKS Audit Logs, detects manual actions performed with the `kubectl` CLI, and sends alerts to SNS subscribed operators.
+
+## Usage
+
+```terraform
+terraform {
+  source = "git::https://github.com/seifrajhi/eks-auditing-bot-module.git"
+}
+
+inputs = {
+  eks_bot_name              = "eks_audit_logs_bot"
+  timeout                   = 60
+  memory_limit              = 256
+  aws_cloudwatch_log_group  = "/aws/eks/cluster-name/cluster"
+  account_id                = "XXXXXXXXXX"
+  account_name              = "account-name"
+  sns_topic_arn             = "arn:aws:sns:eu-west-1:XXXXXXXXXX:alerts"
+  filter_pattern            = "{ ($.verb != \"get\" && $.verb != \"list\" && $.verb != \"watch\") && ($.user.username = \"sre/*\" || $.user.username = \"ssouser/*\" || $.user.username = \"kubernetes-admin\" ) && ((($.objectRef.namespace = \"kube-system\" || $.objectRef.namespace = \"consul\" || $.objectRef.namespace = \"vault\" || $.objectRef.namespace = \"consul\" || $.objectRef.namespace = \"istio-ingress\" || $.objectRef.namespace = \"ingress-system\" || $.objectRef.namespace = \"istio-system\" ) && ($.objectRef.resource = \"roles\" || $.objectRef.resource = \"secrets\" || $.objectRef.resource = \"serviceaccounts\" || $.objectRef.resource = \"role\" || $.objectRef.resource = \"rolebindings\")) || ($.objectRef.resource = \"clusterroles\" || $.objectRef.resource = \"clusterrolebindings\") )  }"
+}
+```
+
+## Configuration
+
+- `eks_bot_name`: The name for the EKS auditing bot.
+- `timeout`: Execution timeout for the auditing bot (in seconds).
+- `memory_limit`: Memory limit for the auditing bot (in MB).
+- `aws_cloudwatch_log_group`: CloudWatch Log Group for EKS Audit Logs.
+- `account_id`: AWS account ID.
+- `account_name`: AWS account name.
+- `sns_topic_arn`: ARN of the SNS topic for sending alerts.
+- `filter_pattern`: CloudWatch Logs filter pattern for detecting manual actions.
+
+
+## Contributing
+
+If you encounter any issues or have suggestions for improvements, please feel free to [open an issue](https://github.com/seifrajhi/eks-auditing-bot-module/issues) or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
